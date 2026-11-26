@@ -5,30 +5,29 @@
   margin: (top: 2cm, bottom: 2cm, left: 3cm, right: 3cm),
 )
 
-#set text(font: "Noto Sans CJK JP", size: 26pt, lang: "ja")
-#set par(leading: 0.75em, justify: true)
+#set text(font: "Noto Sans CJK JP", size: 28pt, lang: "ja")
 
-// 配色
-#let main = rgb("#b5452c")        // 朱
-#let light = rgb("#f6ddd2")       // 淡い朱
-#let sub = rgb("#2f5d62")         // 青緑
-#let sublight = rgb("#dcebea")
-#let gray = rgb("#666666")
+// 配色（参考ポスターと同じ水色1色）
+#let light = rgb(200, 230, 255, 255)
 
-#show link: it => text(sub)[#it]
-#show figure.where(kind: table): set figure.caption(position: top)
-#show figure.caption: set text(size: 24pt)
-#show strong: set text(weight: "bold", fill: main)
+#show link: it => {
+  text(rgb("#0088ff"))[
+    #it
+  ]
+}
+
+#show figure.where(
+  kind: table
+): set figure.caption(position: top)
 
 // ───────────── タイトル ─────────────
 #align(center)[
-  #box(fill: light, inset: (top: 1.8cm, bottom: 1.8cm), width: 100%)[
-    = #text(56pt)[郷土芸能デジタルアーカイブ]
-    #v(0.4cm)
-    #text(36pt, weight: "bold")[
+  #box(fill: light, inset: (top: 2cm, bottom: 2cm), width: 100%)[
+    = #text(48pt)[
+      郷土芸能デジタルアーカイブ\
       断絶しても復活できる形で郷土芸能を保存するWebプラットフォームの構築
     ]
-    #v(0.9cm)
+    #v(1cm)
     #text(weight: "bold")[〇〇研究室　f22123　5J〇〇　〇〇 〇〇]
   ]
 ]
@@ -44,7 +43,7 @@
   )[
     #place(top + left, dx: -6pt, dy: -100pt)[
       #rect(stroke: light + 4pt, fill: white, inset: 15pt)[
-        #text(weight: "bold", size: 30pt)[#title]
+        == #text(weight: "bold", size: 28pt)[#title]
       ]
     ]
     #content
@@ -52,19 +51,19 @@
 }
 
 // 状態ラベル
-#let tag(label, color) = box(
-  fill: color, inset: (x: 10pt, y: 4pt), radius: 6pt, baseline: 4pt,
-)[#text(20pt, fill: white, weight: "bold")[#label]]
-#let done = tag("実装済み", sub)
-#let wip = tag("実装中", rgb("#c98a1b"))
-#let plan = tag("予定", gray)
+#let tag(label) = box(
+  stroke: light + 3pt, inset: (x: 10pt, y: 4pt), baseline: 4pt,
+)[#text(20pt, weight: "bold")[#label]]
+#let done = tag("実装済み")
+#let wip = tag("実装中")
+#let plan = tag("予定")
 
 // 図の箱
-#let node(body, fill: white, stroke: main, w: 100%) = rect(
-  width: w, inset: 12pt, radius: 10pt, fill: fill, stroke: stroke + 3pt,
+#let node(body, fill: white, w: 100%) = rect(
+  width: w, inset: 12pt, fill: fill, stroke: light + 4pt,
 )[#align(center + horizon)[#text(24pt)[#body]]]
-#let arrow = align(center + horizon)[#text(40pt, fill: main)[➜]]
-#let darrow = align(center)[#text(40pt, fill: main)[⬇]]
+#let arrow = align(center + horizon)[#text(40pt)[➜]]
+#let darrow = align(center)[#text(40pt)[⬇]]
 
 // ───────────── 各セクション ─────────────
 #let bg_section = section_box("背景・目的", 100%, auto)[
@@ -94,17 +93,17 @@
     columns: (1fr, 50pt, 1.15fr, 50pt, 1fr),
     row-gutter: 18pt,
     align: horizon,
-    node(fill: sublight, stroke: sub)[伝承の内容\ （語り・文書）], arrow,
+    node(fill: light)[伝承の内容\ （語り・文書）], arrow,
     node[*聞き取り*\ フォーム / LLM], arrow,
-    node(fill: sublight, stroke: sub)[伝承記録\ （構造化テキスト）],
+    node(fill: light)[伝承記録\ （構造化テキスト）],
 
-    node(fill: sublight, stroke: sub)[演奏の録音], arrow,
+    node(fill: light)[演奏の録音], arrow,
     node[*音源分離・採譜*\ audio-worker (GPU)], arrow,
-    node(fill: sublight, stroke: sub)[6パート音源\ 囃子譜・MIDI],
+    node(fill: light)[6パート音源\ 囃子譜・MIDI],
 
-    node(fill: sublight, stroke: sub)[複数視点の動画\ （スマートフォン）], arrow,
+    node(fill: light)[複数視点の動画\ （スマートフォン）], arrow,
     node[*同期・変換*\ multiview-worker (GPU)], arrow,
-    node(fill: sublight, stroke: sub)[視点切り替え\ 動画],
+    node(fill: light)[視点切り替え\ 動画],
   )
   #v(4pt)
   #grid(columns: (1fr), darrow)
@@ -112,8 +111,6 @@
   #node(fill: light)[
     保存会による確認・修正（版管理） ➜ 管理者承認 ➜ 公開ページ
   ]
-  #v(8pt)
-  #text(22pt)[*使用技術*：Astro，FastAPI，S3互換ストレージ，Docker Compose，PyTorch，FFmpeg（Vulkan・NVENC）]
 ]
 
 #let info_section = section_box([機能1：伝承情報の取得　#plan], 100%, auto)[
@@ -133,7 +130,6 @@
       columns: (auto, 1fr, 1fr),
       align: horizon + center,
       inset: 10pt,
-      fill: (_, y) => if y == 0 { light },
       table.header([パート], [分離], [書き起こし]),
       [唄], [声の分離\ (BS-RoFormer系 @lu2023bsroformer @wang2023melroformer)], [旋律 (MIDI) @bittner2022basicpitch],
       [掛け声], [声を唄と短い発声に分割], [発声の時刻],
@@ -161,7 +157,7 @@
     #figure(
       caption: [視点切り替えプレイヤー（下段の小窓で視点を選ぶ）],
     )[
-      #image("assets/multiview_player.png", width: 62%)
+      #image("assets/multiview_player.png", width: 52%)
     ]
   ]
 
@@ -175,7 +171,6 @@
       columns: (1fr, auto),
       align: horizon + center,
       inset: 10pt,
-      fill: (_, y) => if y == 0 { light },
       table.header([項目], [結果]),
       [演目の振り分け（24本）], [3演目×8本に正しく分類],
       [全体の解との最大残差], [2.5〜15.7 ms（1コマ 33 ms）],
@@ -188,16 +183,15 @@
 ]
 
 #let plan_section = section_box("今後の予定：復活できるかの検証", 100%, auto)[
-  　聞き取り・楽譜表示を実装後，実際の演目を登録して検証する．
 
   #grid(
     columns: (1fr, 1fr),
     gutter: 24pt,
-    node(fill: sublight, stroke: sub)[
+    node(fill: light)[
       *検証1：記録の十分さ*\
       #align(left)[再現に必要な情報が足りているかを保存会に確認してもらい，不足項目を洗い出す]
     ],
-    node(fill: sublight, stroke: sub)[
+    node(fill: light)[
       *検証2：アーカイブからの復元*\
       #align(left)[演目を知らない人が*アーカイブだけ*で演目の一部を習得し，保存会が再現度を評価する]
     ],
